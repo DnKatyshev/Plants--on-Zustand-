@@ -17,11 +17,7 @@ React-проект №1(SPA):
 
    3) Технологии:
                  -Стандартные Хуки:
-                      useState()/useEffect()/useTransition()
-                      createContext/useContext() для карточек
-                      useNavigate() *для редиректа с корзины
-                      useParams()
-                      useSearchParams()
+                 -State-manager(Zustand/React-Query)
                  -Кастомный Хук useLocalStorage() для записи в localStorage
                  -Lazy-Loading/Suspense
                  -Новый Routing:
