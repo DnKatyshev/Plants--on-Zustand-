@@ -1,9 +1,9 @@
 // react-dependencies
 import { useContext } from "react"
 
-// redux-dependencies
-import { useDispatch, useSelector } from 'react-redux'
-import { addToCart } from "../../store/mainSlice"; // 1 из action-ов. Их мы диспатчим. А state(через useSelector) читаем из reducer-ов
+// zustand-dependencies
+import { useStore } from '../../store/zustandStore'
+
 
 // project-component's imports
 import { Context } from "../../context/Context"
@@ -14,9 +14,10 @@ import './favoritesItem.scss'
 
 export const FavoritesItem = ({data}) => {
 
-    // dispatch / state ДОБАВЛЕНИЯ В КОРЗИНУ
-    const dispatch = useDispatch()
-    const {cartObject} = useSelector(state => state.reducer)  // объект 1-0, 2-0, 3-1 - State КОРЗИНЫ, выраженный через reducer из configureStore
+    const{
+        cartObject,
+        addToCart,
+    } = useStore()
 
     const {img, title, info, price, id} = data
 
@@ -30,7 +31,7 @@ export const FavoritesItem = ({data}) => {
                     <img src={img} alt="" />
                     <h2>{title}</h2>
                     <a href="#!" className="layout__btn-basket btn card__basket" onClick={() => {
-                        dispatch(addToCart(id))
+                        addToCart(id)
                     }}>
                         ADD
                         {cartObject[id] > 0  &&  <span className='card__li-count'>({cartObject[id]})</span>}

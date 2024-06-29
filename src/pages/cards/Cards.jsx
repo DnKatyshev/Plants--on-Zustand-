@@ -3,12 +3,15 @@ import { useState, useEffect, useTransition, useContext } from 'react'
 import { NavLink } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
-// redux-dependencies
-import { useDispatch, useSelector } from 'react-redux'
-import { addToCart } from "../../store/mainSlice"; // 1 из action-ов. Их мы диспатчим. А state(через useSelector) читаем из reducer-ов
+// zustand-dependencies
+import { useStore } from '../../store/zustandStore'
 
-// API-edpoints-HOOK'S (RTK-Query)
-import { useGetPageDataCardsQuery, useSortCardsByCountry__NorwayQuery, useSortCardsByCountry__ThailandQuery, useSortCardsByPrice__IncQuery, useSortCardsByPrice__DecQuery } from '../../store/createApi';
+// Импортим наши кастомные React-Query Хуки
+import {useGetPageCards} from '../../store/queryHooks/useGetPageCards'
+import {useSortCardsByPriceInc} from '../../store/queryHooks/useSortCardsByPriceInc'
+import {useSortCardsByPriceDec} from '../../store/queryHooks/useSortCardsByPriceDec'
+import {useSortCardsByCountryNorway} from '../../store/queryHooks/useSortCardsByCountryNorway'
+import {useSortCardsByCountryThailand} from '../../store/queryHooks/useSortCardsByCountryThailand'
 
 // project-component's imports
 import { Preloader } from '../../data/Preloader'
@@ -26,57 +29,31 @@ import MenuItem from '@mui/material/MenuItem';
 
 export const Cards = ({isTitlePending}) => {
 
-    // state текста из ПОИСКА , выраженный через reducer из configureStore
-    const {filterCardsText} = useSelector(state => state.reducer)
-
-    // dispatch / state ДОБАВЛЕНИЯ В КОРЗИНУ
-    const dispatch = useDispatch()
-    const {cartObject} = useSelector(state => state.reducer)  // объект 1-0, 2-0, 3-1 - State КОРЗИНЫ, выраженный через reducer из configureStore
-
-
-    // получение ВСЕХ карточек по запросу
+    // получение ВСЕХ карточек по запросу ЧЕРЕЗ RTK-ХУКИ
     const [allCards, setAllCards] = useState(0)
     const [allCardsPending, setAllCardsTransition] = useTransition()
 
-    // ИЗВЛЕКАЕМ data и состояния запроса ИЗ RTK-ХУКОВ:
-    const {
+
+    // "Читаем" из наших кастомных React-Query Хуков: данные / флаги запроса
+    const{
         data: pageCards=[],
-        isSuccess,
-    } = useGetPageDataCardsQuery()
-
-    const {
+        isSuccess
+    } = useGetPageCards()
+    const{
         data: cardsFilterInc=[],
-    } = useSortCardsByPrice__IncQuery()
-
-    const {
+    } = useSortCardsByPriceInc()
+    const{
         data: cardsFilterDec=[],
-    } = useSortCardsByPrice__DecQuery()
-
-    const {
+    } = useSortCardsByPriceDec()
+    const{
         data: cardsFilterNorway=[],
-    } = useSortCardsByCountry__NorwayQuery()
-
-    const {
+    } = useSortCardsByCountryNorway()
+    const{
         data: cardsFilterThailand=[],
-    } = useSortCardsByCountry__ThailandQuery()
-
-    console.log(cardsFilterThailand)
-
-    // ИЗВЛЕКАЕМ data и состояния запроса ИЗ RTK-ХУКОВ:
+    } = useSortCardsByCountryThailand()
+    // "Читаем" из наших кастомных React-Query Хуков: данные / флаги запроса
 
 
-    useEffect( () => {
-        if(isSuccess){
-            setAllCardsTransition(() => setAllCards(pageCards))
-        }
-    }, [pageCards])
-
-
-    // state и функция его изменения для MUI-менюшки
-    const [open, setOpen] = useState(false)
-    function openFlag(){
-        setOpen(!open)
-    }
     // ФУНКЦИИ СОРТИРОВКИ:
     const sortInc = () => {   // 1)СОРТИРОВКА по возрастанию через ЗАПРОС
         setAllCardsTransition( () => setAllCards(cardsFilterInc) )
@@ -91,10 +68,28 @@ export const Cards = ({isTitlePending}) => {
         setAllCardsTransition( () => setAllCards(cardsFilterThailand) )
     }
     const noSort = () => {   // 5) БЕЗ СОРТИРОВКИ
-        setAllCards(pageCards)
+        setAllCardsTransition( () => setAllCards(pageCards) )
+    }
+    // ФУНКЦИИ СОРТИРОВКИ:
+
+    useEffect(() => {
+        if(isSuccess){
+            setAllCardsTransition(() => setAllCards(pageCards))
+        }
+    }, [pageCards])
+
+
+    // достаём actions из ZUSTAND-store
+    const {addToCart, cartObject, filterCardsText} = useStore()  
+
+
+    // state и функция его изменения для MUI-менюшки
+    const [open, setOpen] = useState(false)
+    function openFlag(){
+        setOpen(!open)
     }
 
-
+    console.log('CARDS!')
     // отображение кол-ва добавленного в Избранное / добавление в Избранное  -  КОРЗИНУ Я СДЕЛАЛ ЧЕРЕЗ Reducer-ы / ИЗБРАННОЕ сделал через Context
     const {favoritesMain, addToFavorites} = useContext(Context)
     
@@ -120,7 +115,7 @@ export const Cards = ({isTitlePending}) => {
                             <div className="card__li-options">
                                 <span className="cards__price">{price}$</span>
                                 <a href="#!" className="card__basket btn" onClick={() => {
-                                    dispatch(addToCart(id))
+                                    addToCart(id)
                                 }}>
                                     <svg xmlns="http://www.w3.org/2000/svg" width={'32px'} version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 33 33" fill="#fff">
                                         <g>
@@ -157,7 +152,7 @@ export const Cards = ({isTitlePending}) => {
                             <div className="card__li-options">
                                 <span className="cards__price">{price}$</span>
                                 <a href="#!" className="card__basket btn" onClick={() => {
-                                    dispatch(addToCart(id))
+                                    addToCart(id)
                                 }}>
                                     <svg xmlns="http://www.w3.org/2000/svg" width={'32px'} version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 33 33" fill="#fff">
                                         <g>

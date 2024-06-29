@@ -1,16 +1,11 @@
-// // React-dependencies
+// React-dependencies
 import { RouterProvider, createBrowserRouter, createRoutesFromElements, Route } from 'react-router-dom';
-import { Fragment, lazy, useState, useTransition } from 'react';
+import { Fragment, lazy, useEffect, useState, useTransition } from 'react';
 import { Suspense } from 'react';
 import { AnimatePresence } from 'framer-motion';
 
-// Redux-dependencies
-import { Provider } from 'react-redux';
-// import { store } from './store/configureStore';
-
-// Redux-Persist
-import { PersistGate } from 'redux-persist/integration/react';
-import { store, persistor } from './store/configureStore';
+// React-Query
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 // Pages
 import { Main } from "./pages/main/Main";
@@ -28,13 +23,16 @@ import Layout from './components/Layout';
 
 const App = () => {
 
+    const queryClient = new QueryClient()
+
     // state-lifting for cards's filtering TRANSITION
     const [isTitlePending, startTitleTransition] = useTransition()
 
 
+
+
     const router = createBrowserRouter(
         createRoutesFromElements(
-
 
             <Route
                 path="/"
@@ -76,15 +74,15 @@ const App = () => {
 
 
     return (
-        <Provider store={store}>
-            <PersistGate persistor={persistor} loading={null}>
-                <AnimatePresence mode="wait">
-                    <MainContext>
-                        <RouterProvider router={router} />
-                    </MainContext>
-                </AnimatePresence>
-            </PersistGate>
-        </Provider>
+
+        <QueryClientProvider client={queryClient}>
+            <AnimatePresence mode="wait">
+                <MainContext>
+                    <RouterProvider router={router} />
+                </MainContext>
+            </AnimatePresence>
+        </QueryClientProvider>
+
     )
 }
 

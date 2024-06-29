@@ -3,10 +3,11 @@ import { useState, useEffect, useTransition, useContext } from 'react'
 import { useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
-// redux-dependencies
-import { useDispatch, useSelector } from 'react-redux'
-import { addToCart } from "../../store/mainSlice"; // 1 из action-ов. Их мы диспатчим. А state(через useSelector) читаем из reducer-ов
-import { useGetOneCardQuery } from "../../store/createApi";
+// zustand-dependencies
+import { useStore } from '../../store/zustandStore'
+
+// Импортим наши кастомные React-Query Хуки
+import { useGetOneCard } from '../../store/queryHooks/useGetOneCard'
 
 // CONTEXT
 import { Context } from '../../context/Context'
@@ -21,20 +22,16 @@ import './oneCard.scss'
 
 export const OneCard = () => {
 
-    // dispatch / state ДОБАВЛЕНИЯ В КОРЗИНУ
-    const dispatch = useDispatch()
-    const {cartObject} = useSelector(state => state.reducer)  // объект 1-0, 2-0, 3-1 - State КОРЗИНЫ, выраженный через reducer из configureStore
-
-
     // Запрос к нужной карточке по ID ЧЕРЕЗ action RTK-QUERY
     const { id } = useParams()
     const [oneCardData, setOneCardData] = useState(0)
     const [oneCardsPending, setOneCardTransition] = useTransition()
 
+    // "Читаем" из наших кастомных React-Query Хуков: данные / флаги запроса
     const {
         data,
         isSuccess
-    } = useGetOneCardQuery(id)
+    } = useGetOneCard(id)
 
     useEffect(() => {
         setOneCardTransition( () => {
@@ -44,6 +41,11 @@ export const OneCard = () => {
             }
         )
     }, [data])
+
+
+    // достаём actions из ZUSTAND-store
+    const {addToCart, cartObject} = useStore() 
+
     
     // отображение кол-ва добавленного в Избранное / добавление в Избранное  -  КОРЗИНУ Я СДЕЛАЛ ЧЕРЕЗ Reducer-ы / ИЗБРАННОЕ сделал через Context
     const {favoritesMain, addToFavorites} = useContext(Context)
@@ -64,7 +66,7 @@ export const OneCard = () => {
                             <p>{info}</p>
 
                             <a href="#!" className="one-card__btn btn card__basket" onClick={() => {
-                                dispatch(addToCart(id))
+                                addToCart(id)
                             }}>
                                 ADD
                                 {cartObject[id] > 0  &&  <span className='card__li-count'>({cartObject[id]})</span>}

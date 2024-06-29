@@ -3,9 +3,9 @@ import { useState, useEffect, useContext } from 'react'
 import { NavLink } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
-// redux-dependencies
-import { useDispatch, useSelector } from 'react-redux'
-import { addToCart } from "../../store/mainSlice"; // 1 из action-ов. Их мы диспатчим. А state(через useSelector) читаем из reducer-ов
+// zustand-dependencies
+import { useStore } from '../../store/zustandStore'
+import { ZustandQueries } from "../../store/BASE_URL"
 
 // project-component's imports
 import { MainCards } from '../../components/MainCards/MainCards'
@@ -26,9 +26,10 @@ export const Main = () => {
     // отображение кол-ва добавленного в корзину / добавление в корзину
     const {favoritesMain, addToFavorites} = useContext(Context)
 
-    // dispatch / state ДОБАВЛЕНИЯ В КОРЗИНУ
-    const dispatch = useDispatch()
-    const {cartObject} = useSelector(state => state.reducer)  // объект 1-0, 2-0, 3-1 - State КОРЗИНЫ, выраженный через reducer из configureStore
+    // фнукция добавления / state добавления
+    const {addToCart, cartObject} = useStore()
+
+    console.log('MAIN!')
 
 
     return(
@@ -57,7 +58,7 @@ export const Main = () => {
                                 <div className='layout__example-icons'>
                                     <NavLink to='one-card/6' className="layout__btn btn">Explore</NavLink>
                                     <a href="#!" className="layout__btn-basket btn card__basket" onClick={() => {
-                                        dispatch(addToCart(6))
+                                        addToCart(6)
                                     }}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width={'32px'} version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 33 33" fill="#fff">
                                             <g>

@@ -4,9 +4,9 @@ import { NavLink, useSearchParams, useLocation } from "react-router-dom"
 import { Badge } from "@mui/material";
 import { motion, useScroll, useTransform } from "framer-motion";
 
-// Redux-dependencies
-import { useDispatch, useSelector } from "react-redux";
-import { setFilterCardsText } from "../../store/mainSlice"; // 1 из action-ов. Их мы диспатчим. А state(через useSelector) читаем из reducer-ов
+// zustand-dependencies
+import { useStore } from '../../store/zustandStore'
+import { ZustandQueries } from "../../store/BASE_URL"
 
 //import { Context } from "../../context/Context";
 
@@ -18,10 +18,12 @@ import './header.scss';
 import logo from './resource/logo.png';
 
 
+
 const Header = ({ startTitleTransition }) => {
 
-    const { cartObject } = useSelector(state => state.reducer)  // объект 1-0, 2-0, 3-1 - State КОРЗИНЫ, выраженный через reducer из configureStore
-
+    // const { cartObject, setFilterCardsText } = useStore()  // объект 1-0, 2-0, 3-1 - State КОРЗИНЫ, выраженный через reducer из configureStore
+    const cartObject = useStore(state => state.cartObject)
+    const setFilterCardsText = useStore(state => state.setFilterCardsText)
     // Взаимодействие с DOM
     const [searchFlag, setSearchFlag] = useState(false)
     const searchRef = useRef()
@@ -32,10 +34,9 @@ const Header = ({ startTitleTransition }) => {
 
 
     // Функция фильтрации карточек
-    const dispatch = useDispatch()
     const [searchFieldParams, setSearchFieldParams] = useSearchParams()
     function filterCards(text) {
-        startTitleTransition(() => dispatch(setFilterCardsText(text)))
+        startTitleTransition(() => setFilterCardsText(text))
         setSearchFieldParams(text)
     }
 
@@ -44,9 +45,10 @@ const Header = ({ startTitleTransition }) => {
 
     // Для бейджа
     let bageSum = 0;
-    for (let i in cartObject) {
-        bageSum += cartObject[i]
-    }
+        for (let i in cartObject) {
+            bageSum += cartObject[i]
+        }
+    
 
     // Для progress-line - FramerMotion
     const { scrollYProgress } = useScroll()  // является значением от 0 до 1, в зависимости от скролла

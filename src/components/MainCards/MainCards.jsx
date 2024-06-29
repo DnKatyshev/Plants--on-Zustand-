@@ -3,10 +3,9 @@ import { useState, useEffect, useTransition, useContext } from "react"
 import { NavLink } from "react-router-dom"
 import axios from "axios" // для подгрузки карточек
 
-// redux-dependencies
-import { useDispatch, useSelector } from 'react-redux'
-import { addToCart } from "../../store/mainSlice"; // 1 из action-ов. Их мы диспатчим. А state(через useSelector) читаем из reducer-ов
-import { useGetMainDataCardsQuery } from "../../store/createApi";
+// zustand-dependencies
+import { useStore } from '../../store/zustandStore'
+import { useGetMainDataCards } from "../../store/queryHooks/useGetMainDataCards"
 
 // project-component's imports
 
@@ -22,10 +21,13 @@ export const MainCards = () => {
     const [cards, setCards] = useState(0)
     const [isPending, setTransition] = useTransition()
 
+
     const {
         data,
         isSuccess
-    } = useGetMainDataCardsQuery()
+    } = useGetMainDataCards()
+    
+    console.log('MainCards!')
 
     useEffect(() => {
         if(isSuccess){
@@ -33,6 +35,10 @@ export const MainCards = () => {
         }
     }, [data])
 
+
+    const {addToCart, cartObject} = useStore()  // достаём actions из Zustand-store
+
+    console.log(cartObject)
     
     // Подгрузка карточек
     const [count, getCount] = useState(6)
@@ -53,11 +59,6 @@ export const MainCards = () => {
     // отображение кол-ва добавленного в корзину / добавление в корзину
     const {favoritesMain, addToFavorites} = useContext(Context)
 
-    // dispatch / state ДОБАВЛЕНИЯ В КОРЗИНУ
-    const dispatch = useDispatch()
-    const {cartObject} = useSelector(state => state.reducer)  // объект 1-0, 2-0, 3-1 - State КОРЗИНЫ, выраженный через reducer из configureStore
-
-
     const arrayData = Array.from(cards)
     const readyCards = arrayData.map((card) => {
         let [img, title, info, price, country, id] = [card.img, card.title, card.info, card.price, card.made, card.id]
@@ -76,7 +77,7 @@ export const MainCards = () => {
                         <div className="card__li-options">
                             <span className="card__price">{price}$</span>
                             <a href="#!" className="card__basket btn" onClick={() => {
-                                dispatch(addToCart(id))
+                                addToCart(id)
                             }}>
                                 <svg width={'32px'} version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 33 33" fill="#fff">
                                     <g>
